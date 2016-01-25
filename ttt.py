@@ -67,18 +67,8 @@ class Board:
                 [self.board[2], self.board[4], self.board[6]]]
 
     def vectors(self):
-        v = []
-        for row in self.rows():
-            v.append(row)
-
-        for col in self.cols():
-            v.append(col)
-
-        for diag in self.diags():
-            v.append(diag)
-
-        return v
-
+        return self.rows() + self.cols() + self.diags()
+    
     def vectors_for_cell(self, cell):
         candidates = []
         for vector in self.vectors():
