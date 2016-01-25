@@ -53,17 +53,17 @@ class Board:
                 [self.board[3], self.board[4], self.board[5]],
                 [self.board[6], self.board[7], self.board[8]]]
 
-    def cols(self):
+    def columns(self):
         return [[self.board[0], self.board[3], self.board[6]],
                 [self.board[1], self.board[4], self.board[7]],
                 [self.board[2], self.board[5], self.board[8]]]
 
-    def diags(self):
+    def diagonals(self):
         return [[self.board[0], self.board[4], self.board[8]],
                 [self.board[2], self.board[4], self.board[6]]]
 
     def vectors(self):
-        return self.rows() + self.cols() + self.diags()
+        return self.rows() + self.columns() + self.diagonals()
     
     def vectors_for_cell(self, cell):
         return [vector for vector in self.vectors() if cell in vector]
@@ -186,10 +186,11 @@ def play(b, player):
     
     # Opponent have diagonal corners with me in center? block a fork and grab a side!
     if (len(empty_cells) == 6):
-        if (b.in_cell(4) == player):
-            if ((b.in_cell(0) == opponent and b.in_cell(8) == opponent) or ((b.in_cell(2) == opponent and b.in_cell(6) == opponent))):
-                debug("block opposite-corners fork!")
-                return b.set_cell(random_from_array([1, 3, 5, 7]), player)
+        for diag in b.diagonals():
+            if (diag[1].player == player):
+                if (diag[0].player == opponent and diag[2].player == opponent):
+                    debug("block opposite-corners fork!")
+                    return b.set_cell(random_from_array([1, 3, 5, 7]), player)
 
     # Can opponent create a "fork"?  Block it!
     for cell in empty_cells:
@@ -220,13 +221,13 @@ b = Board()
 while(len(b.empty_cells()) > 0):
     player = b.player_up
     if (player == b.first_player):
-        cell = play(b, player)
-#        move = int(input("move? "))
-#        cell = b.set_cell(move, player)
-    else:
 #        cell = play(b, player)
         move = int(input("move? "))
         cell = b.set_cell(move, player)
+    else:
+        cell = play(b, player)
+#        move = int(input("move? "))
+#        cell = b.set_cell(move, player)
 
     print(b.string() + "\n")
     if (b.winning_move(cell)):
