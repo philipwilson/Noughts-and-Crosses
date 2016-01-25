@@ -4,25 +4,25 @@ import random
 
 class Cell:
     def __init__(self, position):
-        self.__s = ' '
-        self.__i = position
+        self.__owner = None
+        self.__index = position
 
     @property
     def empty(self):
-        return True if (self.__s == ' ') else False  
+        return True if (self.__owner == None) else False  
 
     @property
     def player(self):
-        return "empty" if (self.empty) else self.__s
+        return "empty" if (self.empty) else self.__owner
 
     @property
     def index(self):
-        return self.__i
+        return self.__index
 
     @player.setter
     def player(self, player):
         if self.empty:
-            self.__s = player
+            self.__owner = player
         else:
             raise Exception("trying to set occupied cell error!")
 
