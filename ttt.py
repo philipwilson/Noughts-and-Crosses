@@ -84,8 +84,10 @@ class Board:
     def winning_move(self, cell):
         for v in self.vectors_for_cell(cell):
             stats = self.vector_stats(v)
+            if (stats[cell.player] == 3):
+                return True
 
-        return True if (stats[cell.player] == 3) else False
+        return False
 
     def set_cell(self, position, player):
         cell = self.board[position]
@@ -209,7 +211,7 @@ def play(b, player):
     
     for move in preferred_move_order:
         if (b.cell_empty(move)):
-            debug("killing time")
+            debug("killing time...")
             return b.set_cell(move, player)
 
 # --------------------
