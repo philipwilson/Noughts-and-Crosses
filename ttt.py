@@ -66,11 +66,10 @@ class Board:
         return self.rows() + self.cols() + self.diags()
     
     def vectors_for_cell(self, cell):
-        candidates = []
-        for vector in self.vectors():
-            if cell in vector:
-                candidates.append(vector)
-        return candidates
+        return [vector for vector in self.vectors() if cell in vector]
+
+    def empty_cells(self):
+        return [cell for cell in self.board if cell.empty]
 
     def vector_stats(self, vector):
         # return a dict with cell counts for each player and empty 
@@ -86,9 +85,7 @@ class Board:
         for v in self.vectors_for_cell(cell):
             stats = self.vector_stats(v)
 
-            if (stats[cell.player] == 3):
-                return True
-        return False
+        return True if (stats[cell.player] == 3) else False
 
     def set_cell(self, position, player):
         cell = self.board[position]
@@ -104,13 +101,6 @@ class Board:
         
     def opponent(self, player):
         return self.players[1] if (player == self.players[0]) else self.players[0]
-
-    def empty_cells(self):
-        empties = []
-        for cell in self.board:
-            if (cell.empty):
-                empties.append(cell)
-        return empties
 
     def display_cell(self, cell):
         return ' ' if cell.empty else cell.player
