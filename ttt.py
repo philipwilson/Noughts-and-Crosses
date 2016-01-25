@@ -16,10 +16,6 @@ class Cell:
         return "empty" if (self.empty) else self.__s
 
     @property
-    def s(self):
-        return self.__s
-    
-    @property
     def index(self):
         return self.__i
 
@@ -116,14 +112,17 @@ class Board:
                 empties.append(cell)
         return empties
 
+    def display_cell(self, cell):
+        return ' ' if cell.empty else cell.player
+    
     def string(self):
         r = self.rows()
         
-        return "\n".join(["|".join(map(lambda x: x.s, r[0])),
+        return "\n".join(["|".join(map(lambda x: self.display_cell(x), r[0])),
                           "-----",
-                          "|".join(map(lambda x: x.s, r[1])),
+                          "|".join(map(lambda x: self.display_cell(x), r[1])),
                           "-----",
-                          "|".join(map(lambda x: x.s, r[2]))])
+                          "|".join(map(lambda x: self.display_cell(x), r[2]))])
 
     def winnable_vector(self, v, player):
         stats = self.vector_stats(v)
