@@ -108,12 +108,12 @@ class Board:
     def string(self):
         r = self.rows()
         
-        return "\n".join(["|".join(map(lambda x: self.display_cell(x), r[0])),
+        return "\n".join(["|".join([self.display_cell(x) for x in r[0]]),
                           "-----",
-                          "|".join(map(lambda x: self.display_cell(x), r[1])),
+                          "|".join([self.display_cell(x) for x in r[1]]),
                           "-----",
-                          "|".join(map(lambda x: self.display_cell(x), r[2]))])
-
+                          "|".join([self.display_cell(x) for x in r[2]])])
+    
     def winnable_vector(self, v, player):
         stats = self.vector_stats(v)
         return True if (stats[player] == 2 and stats['empty'] == 1) else False
@@ -133,7 +133,7 @@ class Board:
             if ((stats[player] == 1) and (stats['empty'] == 2)):
                 count = count + 1
 
-        return True if (count == 2) else False
+        return True if (count >= 2) else False
 
     def possible_wins(self, player):
         possibles = {}
@@ -156,7 +156,7 @@ def random_from_array(a):
     return a[random.randrange(len(a))]
 
 # ----------------------------------
-# play:  strategy for a move is here
+# play: strategy for a move is here
 # ----------------------------------
 
 def play(b, player):
