@@ -6,6 +6,12 @@
 import random
 import sys
 
+def random_from_array(array):
+    """  Return a random element from the array.
+    """
+    return array[random.randrange(len(array))]
+
+
 class Cell:
     """ Cells are either empty, or hold a player's mark.  I use objects for easy pass-by-reference,
         so the same cell can be in multiple vectors (row, column, diagonal) in the game.
@@ -176,23 +182,23 @@ class Board:
                           "-----",
                           "|".join([self.__display_cell(x) for x in rows[2]])])
 
-    def winnable_vector(self, vector, player):
+    def __winnable_vector(self, vector, player):
         """ Could player win this vector by taking the remaining cell?
         """
         stats = self.__vector_stats(vector)
         return stats[player] == 2 and stats['empty'] == 1
 
-    def winning_move_for(self, player):
+    def __winning_move_for(self, player):
         """ Return a winning move if one exists (see above).
         """
         for vector in self.vectors():
-            if self.winnable_vector(vector, player):
+            if self.__winnable_vector(vector, player):
                 for cell in vector:
                     if cell.empty:
                         return cell.index
         return None
 
-    def move_makes_fork(self, cell, player):
+    def __move_makes_fork(self, cell, player):
         """ A fork is when two different vectors could be won in the next move,
             i.e., winning can't be blocked.
         """
@@ -204,7 +210,7 @@ class Board:
 
         return count >= 2
 
-    def possible_wins(self, player):
+    def __possible_wins(self, player):
         """ Return a list of moves that are in vectors with no opponent cells.
             These are vectors that could still be won.
         """
@@ -217,87 +223,90 @@ class Board:
                     break
         return possibles.keys()
 
+    def __first_move(self):
+        """  Grab a corner if moving first.  Randomize for fun..
+        """
+        return random_from_array([0, 2, 6, 8]) if self.turn == 0 else None
 
-def random_from_array(array):
-    """  Return a random element from the array.
-    """
-    return array[random.randrange(len(array))]
+    def __my_winning_move(self):
+        """  If player can complete a vector, do it.
+        """
+        player = self.player_up
+        return self.__winning_move_for(player)
 
-def first_move(board, player):
-    """  Grab a corner if moving first.  Randomize for fun..
-    """
-    return random_from_array([0, 2, 6, 8]) if board.turn == 0 else None
+    def __block_winning_move(self):
+        """  If opponent could win next turn, block it.
+        """
+        player = self.player_up
+        opponent = self.opponent(player)
+        return self.__winning_move_for(opponent)
 
-def my_winning_move(board, player):
-    """  If player can complete a vector, do it.
-    """
-    return board.winning_move_for(player)
+    def __create_fork(self):
+        """  Create a fork.  See:  Board.__move_makes_fork().
+        """
+        player = self.player_up
+        for cell in self.empty_cells():
+            if self.__move_makes_fork(cell, player):
+                return cell.index
+        return None
 
-def block_winning_move(board, player):
-    """  If opponent could win next turn, block it.
-    """
-    opponent = board.opponent(player)
-    return board.winning_move_for(opponent)
+    def __block_diag_fork(self):
+        """  Block opposite-corners special case.
+        """
+        player = self.player_up
+        if len(self.empty_cells()) == 6:
+            opponent = self.opponent(player)
+            for diag in self.diagonals():
+                if diag[1].player == player:
+                    if diag[0].player == opponent and diag[2].player == opponent:
+                        return random_from_array([1, 3, 5, 7])
+        return None
 
-def create_fork(board, player):
-    """  Create a fork.  See:  Board.move_makes_fork().
-    """
-    for cell in board.empty_cells():
-        if board.move_makes_fork(cell, player):
-            return cell.index
-    return None
+    def __block_fork(self):
+        """  Stop opponent creating fork.
+        """
+        player = self.player_up
+        opponent = self.opponent(player)
+        for cell in self.empty_cells():
+            if self.__move_makes_fork(cell, opponent):
+                return cell.index
+        return None
 
-def block_diag_fork(board, player):
-    """  Block opposite-corners special case.
-    """
-    if len(board.empty_cells()) == 6:
-        opponent = board.opponent(player)
-        for diag in board.diagonals():
-            if diag[1].player == player:
-                if diag[0].player == opponent and diag[2].player == opponent:
-                    return random_from_array([1, 3, 5, 7])
-    return None
+    def __default_move(self):
+        """  Prefer center, then corners, then sides.
+             First try  moves that could lead to winning!
+        """
+        player = self.player_up
+        preferred_move_order = [4, 0, 2, 6, 8, 1, 3, 5, 7]
+        could_wins = self.__possible_wins(player)
+        for candidate in preferred_move_order:
+            if candidate in could_wins:
+                return candidate
 
-def block_fork(board, player):
-    """  Stop opponent creating fork.
-    """
-    opponent = board.opponent(player)
-    for cell in board.empty_cells():
-        if board.move_makes_fork(cell, opponent):
-            return cell.index
-    return None
+        for candidate in preferred_move_order:
+            if self.cell_empty(candidate):
+                return candidate
 
-def default_move(board, player):
-    """  Prefer center, then corners, then sides.
-         First try  moves that could lead to winning!
-    """
-    preferred_move_order = [4, 0, 2, 6, 8, 1, 3, 5, 7]
-    could_wins = board.possible_wins(player)
-    for candidate in preferred_move_order:
-        if candidate in could_wins:
-            return candidate
+    def generate_move(self):
+        """  Try move generators in order till one returns a move.
+        """
+        for tactic in [self.__first_move,
+                       self.__my_winning_move,
+                       self.__block_winning_move,
+                       self.__create_fork,
+                       self.__block_diag_fork,
+                       self.__block_fork,
+                       self.__default_move]:
 
-    for candidate in preferred_move_order:
-        if board.cell_empty(candidate):
-            return candidate
-
-def move(board):
-    """  Try move generators in order till one returns a move.
-    """
-    player = board.player_up
-
-    for func in [first_move, my_winning_move, block_winning_move, create_fork,
-                 block_diag_fork, block_fork, default_move]:
-
-        play = func(board, player)
-        if play is not None:
-            return play
+            move = tactic()
+            if move is not None:
+                return move
 
 def main(argv):
     """ Main playing loop.  Alternate input between players.
     """
     game = Board()
-    movefunc = [lambda: move(game), lambda: move(game)]
+    movefunc = [game.generate_move, game.generate_move]
 
     try:
         if argv[1] == 'first':
