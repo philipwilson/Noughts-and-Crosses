@@ -4,6 +4,7 @@
 """
 
 import random
+import sys
 
 class Cell:
     """ Cells are either empty, or hold a player's mark.  I use objects for easy pass-by-reference,
@@ -287,24 +288,32 @@ def play(board, player):
         if move is not None:
             return move
 
-def main():
+def main(argv):
     """ Main playing loop.  Alternate input between players.
     """
     game = Board()
+    movefunc = [lambda: play(game, game.player_up), lambda: play(game, game.player_up)]
 
-    while game.turn < 9:
-        if game.player_up == game.first_player:
-            move = int(input("move? "))
-        else:
-            move = play(game, game.second_player)
+    try:
+        if argv[1] == 'first':
+            movefunc[0] = lambda: int(input("move? "))
 
-        cell = game.set_cell(move, game.player_up)
+        elif argv[1] == 'second':
+            movefunc[1] = lambda: int(input("move? "))
 
+        elif argv[1] == 'both':
+            pass
+        
+    except IndexError:
+        print("Usage:  " + argv[0] + " [first|second|both]")
+        sys.exit(0)
+    
+    while(game.turn < 9):
+        cell = game.set_cell(movefunc[game.turn %2](), game.player_up)
         print(game.string() + "\n")
         if game.winning_move(cell):
             print(cell.player + " Wins!")
             break
 
 if __name__ == "__main__":
-    # execute only if run as a script
-    main()
+    main(sys.argv)
