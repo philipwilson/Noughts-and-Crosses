@@ -18,7 +18,7 @@ class Cell:
     def empty(self):
         """  Is this cell empty?
         """
-        return True if (self.__owner is None) else False
+        return self.__owner is None
 
     @property
     def player(self):
@@ -175,7 +175,7 @@ class Board:
         """ Could player win this vector by taking the remaining cell?
         """
         stats = self.__vector_stats(vector)
-        return True if (stats[player] == 2 and stats['empty'] == 1) else False
+        return stats[player] == 2 and stats['empty'] == 1
 
     def winning_move_for(self, player):
         """ Return a winning move if one exists (see above).
@@ -197,7 +197,7 @@ class Board:
             if (stats[player] == 1) and (stats['empty'] == 2):
                 count = count + 1
 
-        return True if (count >= 2) else False
+        return count >= 2
 
     def possible_wins(self, player):
         """ Return a list of moves that are in vectors with no opponent cells.
@@ -297,9 +297,9 @@ def main():
             move = int(input("move? "))
         else:
             move = play(game, game.second_player)
-            
+
         cell = game.set_cell(move, game.player_up)
-        
+
         print(game.string() + "\n")
         if game.winning_move(cell):
             print(cell.player + " Wins!")
