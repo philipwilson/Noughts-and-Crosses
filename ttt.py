@@ -133,9 +133,13 @@ class Board:
 
         return False
 
-    def set_cell(self, position, player):
+    def set_cell(self, position, player = None):
         """ Claim a cell for the player, adjust turn
         """
+
+        if player == None:
+            player = self.player_up
+            
         cell = self.board[position]
         cell.player = player
         self.__turn = self.__turn + 1
@@ -277,10 +281,11 @@ def default_move(board, player):
         if board.cell_empty(move):
             return move
 
-def play(board, player):
+def move(board):
     """  Try move generators in order till one returns a move.
     """
-
+    player = board.player_up
+    
     for func in [first_move, my_winning_move, block_winning_move, create_fork,
                  block_diag_fork, block_fork, default_move]:
 
@@ -292,7 +297,7 @@ def main(argv):
     """ Main playing loop.  Alternate input between players.
     """
     game = Board()
-    movefunc = [lambda: play(game, game.player_up), lambda: play(game, game.player_up)]
+    movefunc = [lambda: move(game), lambda: move(game)]
 
     try:
         if argv[1] == 'first':
@@ -309,7 +314,7 @@ def main(argv):
         sys.exit(0)
     
     while(game.turn < 9):
-        cell = game.set_cell(movefunc[game.turn %2](), game.player_up)
+        cell = game.set_cell(movefunc[game.turn %2]())
         print(game.string() + "\n")
         if game.winning_move(cell):
             print(cell.player + " Wins!")
