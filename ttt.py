@@ -228,7 +228,7 @@ class Board:
         """
         return random_from_array([0, 2, 6, 8]) if self.turn == 0 else None
 
-    def __my_winning_move(self):
+    def __take_winning_move(self):
         """  If player can complete a vector, do it.
         """
         player = self.player_up
@@ -291,7 +291,7 @@ class Board:
         """  Try move generators in order till one returns a move.
         """
         for tactic in [self.__first_move,
-                       self.__my_winning_move,
+                       self.__take_winning_move,
                        self.__block_winning_move,
                        self.__create_fork,
                        self.__block_diag_fork,
