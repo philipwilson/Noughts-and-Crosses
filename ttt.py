@@ -133,13 +133,13 @@ class Board:
 
         return False
 
-    def set_cell(self, position, player = None):
+    def set_cell(self, position, player=None):
         """ Claim a cell for the player, adjust turn
         """
 
-        if player == None:
+        if player is None:
             player = self.player_up
-            
+
         cell = self.board[position]
         cell.player = player
         self.__turn = self.__turn + 1
@@ -273,25 +273,25 @@ def default_move(board, player):
     """
     preferred_move_order = [4, 0, 2, 6, 8, 1, 3, 5, 7]
     could_wins = board.possible_wins(player)
-    for move in preferred_move_order:
-        if move in could_wins:
-            return move
+    for candidate in preferred_move_order:
+        if candidate in could_wins:
+            return candidate
 
-    for move in preferred_move_order:
-        if board.cell_empty(move):
-            return move
+    for candidate in preferred_move_order:
+        if board.cell_empty(candidate):
+            return candidate
 
 def move(board):
     """  Try move generators in order till one returns a move.
     """
     player = board.player_up
-    
+
     for func in [first_move, my_winning_move, block_winning_move, create_fork,
                  block_diag_fork, block_fork, default_move]:
 
-        move = func(board, player)
-        if move is not None:
-            return move
+        play = func(board, player)
+        if play is not None:
+            return play
 
 def main(argv):
     """ Main playing loop.  Alternate input between players.
@@ -308,12 +308,12 @@ def main(argv):
 
         elif argv[1] == 'both':
             pass
-        
+
     except IndexError:
         print("Usage:  " + argv[0] + " [first|second|both]")
         sys.exit(0)
-    
-    while(game.turn < 9):
+
+    while game.turn < 9:
         cell = game.set_cell(movefunc[game.turn %2]())
         print(game.string() + "\n")
         if game.winning_move(cell):
