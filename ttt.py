@@ -121,12 +121,9 @@ class Board:
     def __vector_stats(self, vector):
         """ Return a dict with cell counts for each player and empty.
         """
-        stats = {'empty' : 0}
-        for player in self.players:
-            stats[player] = 0
-
+        stats = {}
         for cell in vector:
-            stats[cell.player] = stats[cell.player] + 1
+            stats[cell.player] = stats.get(cell.player, 0) + 1
         return stats
 
     def winning_move(self, cell):
@@ -134,7 +131,7 @@ class Board:
         """
         for vector in self.vectors_for_cell(cell):
             stats = self.__vector_stats(vector)
-            if stats[cell.player] == 3:
+            if stats.get(cell.player,0) == 3:
                 return True
 
         return False
@@ -186,7 +183,7 @@ class Board:
         """ Could player win this vector by taking the remaining cell?
         """
         stats = self.__vector_stats(vector)
-        return stats[player] == 2 and stats['empty'] == 1
+        return stats.get(player,0) == 2 and stats.get('empty',0) == 1
 
     def __winning_move_for(self, player):
         """ Return a winning move if one exists (see above).
@@ -205,7 +202,7 @@ class Board:
         count = 0
         for vector in self.vectors_for_cell(cell):
             stats = self.__vector_stats(vector)
-            if (stats[player] == 1) and (stats['empty'] == 2):
+            if (stats.get(player,0) == 1) and (stats.get('empty',0) == 2):
                 count = count + 1
 
         return count >= 2
@@ -218,7 +215,7 @@ class Board:
         for cell in self.empty_cells():
             for vector in self.vectors_for_cell(cell):
                 stats = self.__vector_stats(vector)
-                if stats[self.opponent(player)] == 0:
+                if stats.get(self.opponent(player),0) == 0:
                     possibles[cell.index] = 1
                     break
         return possibles.keys()
