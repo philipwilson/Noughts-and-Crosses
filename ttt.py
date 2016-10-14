@@ -3,14 +3,8 @@
 """  Board and playing strategy for Noughts & Crosses.
 """
 
-import random
+from random import choice
 import sys
-
-def random_from_array(array):
-    """  Return a random element from the array.
-    """
-    return array[random.randrange(len(array))]
-
 
 class Cell:
     """ Cells are either empty, or hold a player's mark.  I use objects for easy pass-by-reference,
@@ -124,6 +118,7 @@ class Board:
         stats = {}
         for cell in vector:
             stats[cell.player] = stats.get(cell.player, 0) + 1
+
         return stats
 
     def winning_move(self, cell):
@@ -131,7 +126,7 @@ class Board:
         """
         for vector in self.vectors_for_cell(cell):
             stats = self.__vector_stats(vector)
-            if stats.get(cell.player,0) == 3:
+            if stats.get(cell.player, 0) == 3:
                 return True
 
         return False
@@ -183,7 +178,7 @@ class Board:
         """ Could player win this vector by taking the remaining cell?
         """
         stats = self.__vector_stats(vector)
-        return stats.get(player,0) == 2 and stats.get('empty',0) == 1
+        return stats.get(player, 0) == 2 and stats.get('empty', 0) == 1
 
     def __winning_move_for(self, player):
         """ Return a winning move if one exists (see above).
@@ -202,7 +197,7 @@ class Board:
         count = 0
         for vector in self.vectors_for_cell(cell):
             stats = self.__vector_stats(vector)
-            if (stats.get(player,0) == 1) and (stats.get('empty',0) == 2):
+            if (stats.get(player, 0) == 1) and (stats.get('empty', 0) == 2):
                 count = count + 1
 
         return count >= 2
@@ -215,7 +210,7 @@ class Board:
         for cell in self.empty_cells():
             for vector in self.vectors_for_cell(cell):
                 stats = self.__vector_stats(vector)
-                if stats.get(self.opponent(player),0) == 0:
+                if stats.get(self.opponent(player), 0) == 0:
                     possibles[cell.index] = 1
                     break
         return possibles.keys()
@@ -223,7 +218,7 @@ class Board:
     def __first_move(self):
         """  Grab a corner if moving first.  Randomize for fun..
         """
-        return random_from_array([0, 2, 6, 8]) if self.turn == 0 else None
+        return choice([0, 2, 6, 8]) if self.turn == 0 else None
 
     def __take_winning_move(self):
         """  If player can complete a vector, do it.
@@ -256,7 +251,7 @@ class Board:
             for diag in self.diagonals():
                 if diag[1].player == player:
                     if diag[0].player == opponent and diag[2].player == opponent:
-                        return random_from_array([1, 3, 5, 7])
+                        return choice([1, 3, 5, 7])
         return None
 
     def __block_fork(self):
